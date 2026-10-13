@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
+import { sendChat } from '@/lib/mockClient';
 
 interface Msg { role: 'user' | 'assistant'; content: string }
 
@@ -17,16 +18,12 @@ export default function ChatPage() {
   const send = async () => {
     const text = input.trim();
     if (!text || loading) return;
-    setMsgs((m) => [...m, { role: 'user', content: text }]);
+    const next = [...msgs, { role: 'user' as const, content: text }];
+    setMsgs(next);
     setInput('');
     setLoading(true);
-    const res = await fetch('/api/mock/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [...msgs, { role: 'user', content: text }], lang: s.lang }),
-    });
-    const data = await res.json();
-    setMsgs((m) => [...m, { role: 'assistant', content: data.reply }]);
+    const reply = await sendChat(next, s.lang);
+    setMsgs((m) => [...m, { role: 'assistant', content: reply }]);
     setLoading(false);
   };
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
+import { generateVideo } from '@/lib/mockClient';
 
 export default function VideoPage() {
   const s = useApp();
@@ -15,12 +16,7 @@ export default function VideoPage() {
   const generate = async () => {
     if (!prompt.trim()) return;
     setLoading(true);
-    const res = await fetch('/api/mock/video', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await res.json();
+    const data = await generateVideo(prompt);
     setJobs((j) => [{ id: data.id, prompt, status: data.status }, ...j]);
     setLoading(false);
     setPrompt('');

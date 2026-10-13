@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
+import { generateDesign } from '@/lib/mockClient';
 
 export default function DesignPage() {
   const s = useApp();
@@ -15,12 +16,7 @@ export default function DesignPage() {
   const generate = async () => {
     if (!prompt.trim()) return;
     setLoading(true);
-    const res = await fetch('/api/mock/design', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await res.json();
+    const data = await generateDesign(prompt);
     setResults((r) => [{ id: data.id, url: data.url, prompt }, ...r]);
     setLoading(false);
     setPrompt('');

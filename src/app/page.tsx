@@ -4,21 +4,25 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
+import { apiLogin } from '@/lib/api';
 
 export default function Home() {
   const t = dict[useApp((s) => s.lang)];
   const lang = useApp((s) => s.lang);
   const setLang = useApp((s) => s.setLang);
-  const login = useApp((s) => s.login);
+  const setUser = useApp((s) => s.setUser);
   const router = useRouter();
   const [email, setEmail] = useState('super@nashir.sa');
-  const [password, setPassword] = useState('demo');
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email)) router.push('/dashboard');
-    else setErr(true);
+    const u = await apiLogin(email, password);
+    if (u) {
+      setUser(u);
+      router.push('/dashboard');
+    } else setErr(true);
   };
 
   return (
@@ -55,13 +59,10 @@ export default function Home() {
               dir="ltr"
             />
           </label>
-          {err && <p className="text-red-600 text-sm">✗ {email ? 'حساب غير موجود أو موقوف / Account not found or inactive' : ''}</p>}
+          {err && <p className="text-red-600 text-sm">✗ {lang === 'ar' ? 'بريد أو كلمة مرور غير صحيحة' : 'Invalid email or password'}</p>}
           <button type="submit" className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 transition">
             {t.signIn}
           </button>
-          <p className="text-xs text-slate-400 text-center" dir="ltr">
-            Demo accounts: super@nashir.sa · prod.admin@nashir.sa · sarah@nashir.sa
-          </p>
         </form>
       </div>
     </main>

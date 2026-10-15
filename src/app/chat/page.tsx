@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
-import { sendChat } from '@/lib/mockClient';
+import { apiChat } from '@/lib/api';
 
 interface Msg { role: 'user' | 'assistant'; content: string }
 
@@ -14,6 +14,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(false);
 
   const send = async () => {
     const text = input.trim();
@@ -22,15 +23,20 @@ export default function ChatPage() {
     setMsgs(next);
     setInput('');
     setLoading(true);
-    const reply = await sendChat(next, s.lang);
-    setMsgs((m) => [...m, { role: 'assistant', content: reply }]);
+    setErr(false);
+    try {
+      const reply = await apiChat(next, s.lang);
+      setMsgs((m) => [...m, { role: 'assistant', content: reply }]);
+    } catch {
+      setErr(true);
+    }
     setLoading(false);
   };
 
   return (
     <Shell>
-      <h1 className="text-2xl font-bold mb-2">🤖 {t.aiChat}</h1>
-      <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2 inline-block mb-4">{t.mockNotice}</p>
+      <h1 className="text-2xl font-bold mb-4">🤖 {t.aiChat}</h1>
+      {err && <p className="text-red-600 text-sm mb-3">{t.noPermission}</p>}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[65vh] p-4">
         <div className="flex-1 overflow-y-auto space-y-3 mb-4">
           {msgs.map((m, i) => (

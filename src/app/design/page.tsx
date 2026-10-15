@@ -4,28 +4,34 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
-import { generateDesign } from '@/lib/mockClient';
+import { apiGenerate } from '@/lib/api';
 
 export default function DesignPage() {
   const s = useApp();
   const t = dict[s.lang];
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(false);
   const [results, setResults] = useState<{ id: string; url: string; prompt: string }[]>([]);
 
   const generate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || loading) return;
     setLoading(true);
-    const data = await generateDesign(prompt);
-    setResults((r) => [{ id: data.id, url: data.url, prompt }, ...r]);
+    setErr(false);
+    try {
+      const data = await apiGenerate('design', prompt);
+      setResults((r) => [{ id: data.id, url: data.url || '', prompt }, ...r]);
+      setPrompt('');
+    } catch {
+      setErr(true);
+    }
     setLoading(false);
-    setPrompt('');
   };
 
   return (
     <Shell>
-      <h1 className="text-2xl font-bold mb-2">🎨 {t.designStudio}</h1>
-      <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2 inline-block mb-6">{t.mockNotice}</p>
+      <h1 className="text-2xl font-bold mb-6">🎨 {t.designStudio}</h1>
+      {err && <p className="text-red-600 text-sm mb-3">{t.noPermission}</p>}
       <div className="flex gap-2 mb-8">
         <textarea
           value={prompt}

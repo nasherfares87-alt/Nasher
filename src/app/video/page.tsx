@@ -4,28 +4,34 @@ import { useState } from 'react';
 import Shell from '@/components/Shell';
 import { useApp } from '@/store/useApp';
 import { dict } from '@/lib/i18n';
-import { generateVideo } from '@/lib/mockClient';
+import { apiGenerate } from '@/lib/api';
 
 export default function VideoPage() {
   const s = useApp();
   const t = dict[s.lang];
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(false);
   const [jobs, setJobs] = useState<{ id: string; prompt: string; status: string }[]>([]);
 
   const generate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || loading) return;
     setLoading(true);
-    const data = await generateVideo(prompt);
-    setJobs((j) => [{ id: data.id, prompt, status: data.status }, ...j]);
+    setErr(false);
+    try {
+      const data = await apiGenerate('video', prompt);
+      setJobs((j) => [{ id: data.id, prompt, status: data.status }, ...j]);
+      setPrompt('');
+    } catch {
+      setErr(true);
+    }
     setLoading(false);
-    setPrompt('');
   };
 
   return (
     <Shell>
-      <h1 className="text-2xl font-bold mb-2">🎬 {t.videoStudio}</h1>
-      <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2 inline-block mb-6">{t.mockNotice}</p>
+      <h1 className="text-2xl font-bold mb-6">🎬 {t.videoStudio}</h1>
+      {err && <p className="text-red-600 text-sm mb-3">{t.noPermission}</p>}
       <div className="flex gap-2 mb-8">
         <textarea
           value={prompt}

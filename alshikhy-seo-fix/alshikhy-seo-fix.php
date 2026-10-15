@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Alshikhy SEO Fix
- * Description: إصلاحات فهرسة جوجل: توحيد النطاق، إعادة توجيه المرفقات، noindex للوسوم، منع معاملات ?v= من التكرار
- * Version: 1.0
+ * Description: إصلاحات فهرسة جوجل: توحيد النطاق، إعادة توجيه المرفقات، noindex للوسوم، منع معاملات ?v= من التكرار، إضافة خريطة الموقع إلى robots.txt (متوافق مع Yoast)
+ * Version: 1.1
  */
 
 if (!defined('ABSPATH')) exit;
@@ -16,7 +16,7 @@ add_action('template_redirect', function () {
     }
 });
 
-// 2) إعادة توجيه صفحات المرفقات إلى المقال الأص (يوقف attachment-sitemap والتكرار)
+// 2) إعادة توجيه صفحات المرفقات إلى المقال الأص
 add_action('template_redirect', function () {
     if (is_attachment()) {
         $parent = get_post(get_post()->post_parent);
@@ -28,13 +28,13 @@ add_action('template_redirect', function () {
 
 // 3) noindex لصفحات الوسوم والأرشيفات الرقيقة
 add_filter('wpseo_robots', function ($robots) {
-    if (is_tag() || is_date() || (is_search() )) {
+    if (is_tag() || is_date() || is_search()) {
         return 'noindex, follow';
     }
     return $robots;
 });
 
-// 4) تنظيف معاملات ?v= من روابط المرفقات داخل المحتوى وخريطة الموقع
+// 4) تنظيف معاملات ?v= من روابط المرفقات
 add_filter('wp_get_attachment_url', function ($url) {
     return strtok($url, '?');
 });
@@ -47,7 +47,19 @@ add_filter('wpseo_sitemap_exclude_post_type', function ($exclude, $post_type) {
     return $exclude;
 }, 10, 2);
 
-// 6) إضافة خريطة الموقع إلى robots.txt
-add_filter('robots_txt', function ($output) {
-    return $output . "Sitemap: https://alshikhy.com/sitemap.xml\r\n";
-});
+// 6) إضافة خريطة الموقع إلى robots.txt — عبر فلتر Yoast أولاً ثم الفلتر القياسي
+if (defined('WPSEO_VERSION')) {
+    add_filter('wpseo_robots_txt', function ($output) {
+        if (strpos($output, 'Sitemap:') === false) {
+            $output .= "Sitemap: https://alshikhy.com/sitemap.xml\r\n";
+        }
+        return $output;
+    });
+} else {
+    add_filter('robots_txt', function ($output) {
+        if (strpos($output, 'Sitemap:') === false) {
+            $output .= "Sitemap: https://alshikhy.com/sitemap.xml\r\n";
+        }
+        return $output;
+    });
+}

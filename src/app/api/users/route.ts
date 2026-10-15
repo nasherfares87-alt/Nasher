@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser, can } from '@/lib/auth';
 
 const VALID_ROLES = ['ADMIN', 'EMPLOYEE'];
-const VALID_DEPTS = ['PRODUCTION', 'PROJECT_MANAGEMENT', 'IT', 'DESIGN', 'MARKETING', 'HR', 'FINANCE'];
+const VALID_DEPTS = ['PRODUCTION', 'PROJECT_MANAGEMENT', 'IT', 'DESIGN', 'MARKETING', 'HR', 'FINANCE', 'BUSINESS_DEVELOPMENT'];
 const VALID_PERMS = ['ai.design', 'ai.video', 'ai.chat', 'users.manage', 'users.create', 'reports.view', 'plans.generate', 'assets.download'];
 
 function bad(msg: string, code = 400) {

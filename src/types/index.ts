@@ -1,5 +1,5 @@
 export type Role = 'SUPERADMIN' | 'ADMIN' | 'EMPLOYEE';
-export type Department = 'PRODUCTION' | 'PROJECT_MANAGEMENT' | 'IT' | 'DESIGN' | 'MARKETING' | 'HR' | 'FINANCE';
+export type Department = 'PRODUCTION' | 'PROJECT_MANAGEMENT' | 'IT' | 'DESIGN' | 'MARKETING' | 'HR' | 'FINANCE' | 'BUSINESS_DEVELOPMENT';
 
 export interface User {
   id: string;
@@ -42,6 +42,7 @@ export const DEPARTMENT_LABELS: Record<Department, { ar: string; en: string }> =
   MARKETING: { ar: 'التسويق', en: 'Marketing' },
   HR: { ar: 'الموارد البشرية', en: 'HR' },
   FINANCE: { ar: 'المالية', en: 'Finance' },
+  BUSINESS_DEVELOPMENT: { ar: 'تطوير الأعمال', en: 'Business Development' },
 };
 
 export const ROLE_LABELS: Record<Role, { ar: string; en: string }> = {
